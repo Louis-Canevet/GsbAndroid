@@ -6,14 +6,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.Scanner;
+import java.io.Serializable;
 
-public class AjoutEchantillon extends AppCompatActivity implements View.OnClickListener{
+public class AjoutEchantillon extends AppCompatActivity implements View.OnClickListener {
 
     // propriété
     private TextView txtSaisieEchantillon;
@@ -30,99 +32,73 @@ public class AjoutEchantillon extends AppCompatActivity implements View.OnClickL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ajout_echantillon);
 
-        txtSaisieEchantillon = (TextView) findViewById(R.id.txtSaisieEchantillon);
-        editTextRef = (EditText) findViewById(R.id.editTextRef);
-        editTextDesign = (EditText) findViewById(R.id.editTextDesign);
-        editTextPu = (EditText) findViewById(R.id.editTextPu);
-        btnAjouter = (Button) findViewById(R.id.btnAjouter);
-        btnQuitter = (Button) findViewById(R.id.btnQuitter);
-        txtAffichage = (TextView) findViewById(R.id.txtAffichage);
+        txtSaisieEchantillon = findViewById(R.id.txtSaisieEchantillon);
+        editTextRef = findViewById(R.id.editTextRef);
+        editTextDesign = findViewById(R.id.editTextDesign);
+        editTextPu = findViewById(R.id.editTextPu);
+        btnAjouter = findViewById(R.id.btnAjouter);
+        btnQuitter = findViewById(R.id.btnQuitter);
+        txtAffichage = findViewById(R.id.txtAffichage);
 
-       btnAjouter.setOnClickListener((View.OnClickListener) this);
-       donnees="";
-
-       btnQuitter.setOnClickListener((View.OnClickListener) this);
+        btnAjouter.setOnClickListener(this);
+        donnees = "";
+        btnQuitter.setOnClickListener(this);
 
     }
-
-/*
-        //this.btnQuitter = (Button) findViewById(R.id.btnQuitter);
-        btnQuitter.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            Intent quitterAjoutEchantillon = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(quitterAjoutEchantillon);
-            finish();
-        }
-    });*/
 
     @Override
     public void onClick(View view) {
 
-        this.btnAjouter = (Button) findViewById(R.id.btnAjouter);
-        btnAjouter.setOnClickListener((View.OnClickListener) this);
-        class btnAjouter implements java.io.Serializable
-        {
-            private String code;
-            private String label;
-            private int stock;
+        if (view == btnAjouter) {
+            String code = editTextRef.getText().toString();
+            String label = editTextDesign.getText().toString();
+            int stock = Integer.parseInt(editTextPu.getText().toString());
 
-            public btnAjouter(String code, String label, int stock) {
-                this.code = code;
-                this.label = label;
-                this.stock = stock;
+            Echantillon echantillonAjout = new Echantillon(code, label, stock);
+
+            try {
+                FileOutputStream fileOut = openFileOutput("EchantillonAjout.ser", MODE_PRIVATE);
+                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                out.writeObject(echantillonAjout);
+                out.close();
+                fileOut.close();
+                Toast.makeText(this, "Echantillon ajouté dans le stock et sérialisé dans EchantillonAjout.ser", Toast.LENGTH_SHORT).show();
+            } catch (IOException i) {
+                i.printStackTrace();
             }
-
-            public String getCode() {
-                return code;
-            }
-
-            public String getLabel() {
-                return label;
-            }
-
-            public int getStock() {
-                return stock;
-            }
-
-            public void setStock(int stock) {
-                this.stock = stock;
-            }
-
-            public void main(String[] args) {
-                Scanner scanner = new Scanner(System.in);
-                System.out.print("Enter code echantillon: ");
-                String code = scanner.nextLine();
-                System.out.print("Enter label echantillon: ");
-                String label = scanner.nextLine();
-                System.out.print("Enter stock: echantillon");
-                int stock = scanner.nextInt();
-                scanner.close();
-
-                btnAjouter echantillonAjout = new btnAjouter(code, label, stock);
-
-                try {
-                    FileOutputStream fileOut = new FileOutputStream("EchantillonAjout.ser");
-                    ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                    out.writeObject(btnAjouter);
-                    out.close();
-                    fileOut.close();
-                    System.out.println("Echantillon ajouter dans stock et sérialiser EchantillonAjout.ser");
-                } catch (IOException i) {
-                    i.printStackTrace();
-                }
-            }
+        } else if (view == btnQuitter) {
+            Intent quitterAjoutEchantillon = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(quitterAjoutEchantillon);
+            finish();
         }
-
-        this.btnQuitter = (Button) findViewById(R.id.btnQuitter);
-        btnQuitter.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent quitterAjoutEchantillon = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(quitterAjoutEchantillon);
-                finish();
-            }
-        });
     }
 
+    // Classe Echantillon
+    private static class Echantillon implements Serializable {
+        private String code;
+        private String label;
+        private int stock;
+
+        public Echantillon(String code, String label, int stock) {
+            this.code = code;
+            this.label = label;
+            this.stock = stock;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public int getStock() {
+            return stock;
+        }
+
+        public void setStock(int stock) {
+            this.stock = stock;
+        }
+    }
 }

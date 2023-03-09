@@ -8,10 +8,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
-
-import fr.louis.gsb.R;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 public class ListeEchantillon extends AppCompatActivity {
 
@@ -21,26 +20,34 @@ public class ListeEchantillon extends AppCompatActivity {
     private TextView txtTitreViewListeEchantillon;
     private Button btnQuitterListe;
 
-
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_liste_echantillon);
 
-        txtListViewEchantillon = (TextView) findViewById(R.id.txtListViewEchantillon);
-        txtTitreViewListeEchantillon = (TextView) findViewById(R.id.txtTitreViewListeEchantillon);
+        txtListViewEchantillon = findViewById(R.id.txtListViewEchantillon);
+        txtTitreViewListeEchantillon = findViewById(R.id.txtTitreViewListeEchantillon);
 
+        try {
+            FileInputStream fileIn = new FileInputStream(getFilesDir() + "/EchantillonAjout.ser");
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            Echantillon echantillonAjout = (EchantillonAjout) in.readObject();
+            in.close();
+            fileIn.close();
 
+            // affichage des données
+            donnees = "Code echantillon: " + echantillonAjout.getCode() + "\n" +
+                    "Label echantillon: " + echantillonAjout.getLabel() + "\n" +
+                    "Stock: " + echantillonAjout.getStock();
 
+            txtListViewEchantillon.setText(donnees);
 
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
-
-        donnees = donnees+" / ";
-
-
-
-        this.btnQuitterListe = (Button) findViewById(R.id.btnQuitterListe);
+        btnQuitterListe = findViewById(R.id.btnQuitterListe);
         btnQuitterListe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
